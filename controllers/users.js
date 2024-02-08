@@ -44,11 +44,9 @@ const createUser = (req, res, next) => {
     .catch(next);
 };
 
-//возвращает информацию о пользователе GET /users/me - не работает
+//возвращает информацию о пользователе GET /users/me - работает
 const getUser = (req, res, next) => {
-  const { userId } = req.params;
-
-  return User.findById(userId)
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Такого пользователя не существует');
@@ -63,6 +61,7 @@ const getUser = (req, res, next) => {
       }
     });
 };
+
 // обновляет информацию о юзере  - не работает
 const updateUser = (req, res, next) => {
   const owner = req.user._id;

@@ -1,5 +1,5 @@
 const { CastError, ValidationError } = require('mongoose').Error;
-const MovieModel = require('../models/movie');
+const Movies = require('../models/movie');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
@@ -7,7 +7,8 @@ const ForbiddenError = require('../errors/ForbiddenError');
 const { CREATED_201 } = require('../utils/constants');
 
 // создание фильмов - -работает
-const createMovie = async (req, res, next) => {
+const createMovie =  (req, res, next) => {
+
   const {
     country,
     director,
@@ -22,7 +23,7 @@ const createMovie = async (req, res, next) => {
     nameEN,
   } = req.body;
 
-  const addMovie = new MovieModel({
+  const addMovie = new Movies({
     country,
     director,
     duration,
@@ -49,17 +50,17 @@ const createMovie = async (req, res, next) => {
 
 // просмотр фильмов - работает
 const getMovies = (req, res, next) => {
-  MovieModel.find({ owner: req.user._id })
+  Movies.find({ owner: req.user._id })
     .then((movies) => res.status(200).send(movies))
     .catch((error) => {
       next(error);
     });
 };
 
-// удаление фильма -
+// удаление фильма - работает
 const deleteMovie = (req, res, next) => {
   const { movieId } = req.params;
-  MovieModel.findById(movieId)
+  Movies.findById(movieId)
     .then((film) => {
       if (!film) {
         throw new NotFoundError('Такой карточки не существует');
