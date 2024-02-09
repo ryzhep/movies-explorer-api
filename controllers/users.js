@@ -2,17 +2,17 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
-const { CastError, ValidationError } = require('mongoose').Error;
+const { CastError, validdationError } = require('mongoose').Error;
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
-//const UnauthorizedError = require('../errors/UnauthorizedError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const { CREATED_201 } = require('../utils/constants');
 
-const NotError= 200;
+const OK= 200;
 
-// создает пользователя -  работает
+// создаёт пользователя с переданными в теле email, password и name POST /signup
 const createUser = (req, res, next) => {
   const {
     name,
@@ -35,7 +35,7 @@ const createUser = (req, res, next) => {
           if (err.code === 11000) {
             return next(new ConflictError('Такой email уже существует')); // 409
           }
-          if (err.name === 'ValidationError') {
+          if (err.name === 'validdationError') {
             return next(new BadRequestError('Ошибка валидации'));
           }
           return next(err);
@@ -44,7 +44,7 @@ const createUser = (req, res, next) => {
     .catch(next);
 };
 
-//возвращает информацию о пользователе GET /users/me - работает
+//возвращает информацию о пользователе GET /users/me
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
@@ -62,7 +62,7 @@ const getUser = (req, res, next) => {
     });
 };
 
-// обновляет информацию о юзере  - не работает
+// обновляет информацию о юзере  PATCH /users/me
 const updateUser = (req, res, next) => {
   const owner = req.user._id;
   return User.findByIdAndUpdate(
@@ -70,7 +70,7 @@ const updateUser = (req, res, next) => {
     { name: req.body.name },
     {
       new: true,
-      runValidators: true,
+      runvalidators: true,
     },
   )
     .then((user) => {
@@ -80,7 +80,7 @@ const updateUser = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err instanceof ValidationError) {
+      if (err instanceof validdationError) {
         const errorMessage = Object.values(err.errors)
           .map((error) => error.message)
           .join(', ');
@@ -98,19 +98,15 @@ const login = (req, res, next) => {
     .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(
-          new UnauthorizedError('Неправильные почта или пароль'),
-        );
+        next(new UnauthorizedError('Неправильные почта или пароль'));
       }
 
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(
-            new UnauthorizedError('Неправильные почта или пароль'),
-          );
+          next(new UnauthorizedError('Неправильные почта или пароль'));
         }
-        console.log(jwt)
-        return res.status(200).send({
+
+        return res.status(OK).send({
           message: 'Успешно авторизован',
           token: jwt.sign({ _id: user._id }, 'super-strong-secret', {
             expiresIn: '7d',
@@ -118,10 +114,15 @@ const login = (req, res, next) => {
         });
       });
     })
-    .catch(() => next(new UnauthorizedError('ошибка')))
+    .catch(() => next(new UnauthorizedError('Неизвестная ошибка')))
     .catch(next);
 };
 
+// разлогинится
+const signOut = (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Выход из системы' });
+};
+
 module.exports = {
-  getUser, updateUser,createUser,login
+  getUser, updateUser,createUser,login, signOut
 };

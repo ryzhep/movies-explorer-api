@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require('validator');
 
 // Импорт валидатора
 const isEmail = require("validator/lib/isEmail");
@@ -9,7 +10,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      validate: {
+      validdate: {
         validator: (email) => isEmail(email),
         message: "Некорректный адрес электронной почты",
       },

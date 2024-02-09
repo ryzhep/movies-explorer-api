@@ -1,14 +1,14 @@
-const { CastError, ValidationError } = require('mongoose').Error;
+// const { CastError, validdationError } = require('mongoose').Error;
 const Movies = require('../models/movie');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ForbiddenError = require('../errors/ForbiddenError');
 
 const { CREATED_201 } = require('../utils/constants');
+const OK = 200;
 
-// создание фильмов - -работает
-const createMovie =  (req, res, next) => {
-
+// создаёт фильм с переданными в теле POST /movies
+const createMovie = (req, res, next) => {
   const {
     country,
     director,
@@ -39,25 +39,24 @@ const createMovie =  (req, res, next) => {
   });
 
   addMovie.save()
-  .then((filmSave) => {
-    res.status(CREATED_201).send(filmSave);
-  })
-  .catch((error) => {
-    next(error);
-  });
-};
-
-
-// просмотр фильмов - работает
-const getMovies = (req, res, next) => {
-  Movies.find({ owner: req.user._id })
-    .then((movies) => res.status(200).send(movies))
+    .then((filmSave) => {
+      res.status(CREATED_201).send(filmSave);
+    })
     .catch((error) => {
       next(error);
     });
 };
 
-// удаление фильма - работает
+// возвращает сохраненные фильмы GET /movies
+const getMovies = (req, res, next) => {
+  Movies.find({ owner: req.user._id })
+    .then((movies) => res.status(OK).send(movies))
+    .catch((error) => {
+      next(error);
+    });
+};
+
+// удаление фильма - DELETE /movies/_id
 const deleteMovie = (req, res, next) => {
   const { movieId } = req.params;
   Movies.findById(movieId)
@@ -83,5 +82,5 @@ const deleteMovie = (req, res, next) => {
 module.exports = {
   getMovies,
   createMovie,
-  deleteMovie
+  deleteMovie,
 };
