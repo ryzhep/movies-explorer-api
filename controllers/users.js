@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { CastError, validdationError } = require('mongoose').Error;
+const { CastError, ValidationError } = require('mongoose').Error;
 
 const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
@@ -69,10 +69,13 @@ const updateUser = (req, res, next) => {
   const owner = req.user._id;
   return User.findByIdAndUpdate(
     owner,
-    { name: req.body.name },
+    {
+      name: req.body.name,
+      email: req.body.email,
+    },
     {
       new: true,
-      runvalidators: true,
+      runValidators: true,
     },
   )
     .then((user) => {
@@ -82,11 +85,13 @@ const updateUser = (req, res, next) => {
       res.send(user);
     })
     .catch((err) => {
-      if (err instanceof validdationError) {
+      if (err instanceof ValidationError) {
         const errorMessage = Object.values(err.errors)
           .map((error) => error.message)
           .join(', ');
         next(new BadRequestError(`Некорректные данные: ${errorMessage}`));
+      } else if (err.code === 11000) {
+        next(new ConflictError('Такой пользователь уже существует!'));
       } else {
         next(err);
       }
@@ -110,13 +115,6 @@ const login = (req, res, next) => {
 
         const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
 
-        // Добавляем куки
-        res.cookie('jwt', token, {
-          httpOnly: true, // Сделать куки недоступным для клиентских JavaScript скриптов
-          secure: true, // Отправлять куки только по HTTPS
-          maxAge: 3600000 * 24 * 7, // Установить время жизни куки в 7 дней
-        });
-
         return res.status(OK).send({
           message: 'Успешно авторизован',
           token,
@@ -126,11 +124,6 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
-// разлогинится
-const signOut = (req, res) => {
-  res.clearCookie('jwt').send({ message: 'Выход из системы' });
-};
-
 module.exports = {
-  getUser, updateUser, createUser, login, signOut,
+  getUser, updateUser, createUser, login,
 };

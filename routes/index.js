@@ -6,7 +6,7 @@ const { validAuth, validUserData } = require('../middlewares/validator');
 const NotFoundError = require('../errors/NotFoundError');
 
 const {
-  createUser, login, signOut,
+  createUser, login,
 } = require('../controllers/users');
 
 router.post('/signup', validUserData, createUser);
@@ -15,7 +15,6 @@ router.post('/signin', validAuth, login);
 router.use(auth);
 router.use('/users', usersRouter);
 router.use('/movies', moviesRouter);
-router.post('/signout', signOut);
 
 router.use('*', (req, res, next) => {
   next(
