@@ -31,7 +31,6 @@ const validMovieId = celebrate({
   }),
 });
 
-
 const validUserData = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -46,7 +45,6 @@ const validUpdateProfile = celebrate({
     email: Joi.string().required().email(),
   }),
 });
-
 
 module.exports = {
   validUserData,

@@ -1,8 +1,7 @@
-const mongoose = require("mongoose");
-const validator = require('validator');
+const mongoose = require('mongoose');
 
 // Импорт валидатора
-const isEmail = require("validator/lib/isEmail");
+const isEmail = require('validator/lib/isEmail');
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,9 +9,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      validdate: {
+      validate: {
         validator: (email) => isEmail(email),
-        message: "Некорректный адрес электронной почты",
+        message: 'Некорректный адрес электронной почты',
       },
     },
     password: {
@@ -30,7 +29,7 @@ const userSchema = new mongoose.Schema(
     toJSON: { useProjection: true },
     toObject: { useProjection: true },
     versionKey: false,
-  }
+  },
 );
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model('user', userSchema);

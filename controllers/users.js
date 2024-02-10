@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const User = require('../models/user');
-
 const { CastError, validdationError } = require('mongoose').Error;
+
+const User = require('../models/user');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
@@ -10,7 +10,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const { CREATED_201 } = require('../utils/constants');
 
-const OK= 200;
+const OK = 200;
 
 // создаёт пользователя с переданными в теле email, password и name POST /signup
 const createUser = (req, res, next) => {
@@ -44,7 +44,7 @@ const createUser = (req, res, next) => {
     .catch(next);
 };
 
-//возвращает информацию о пользователе GET /users/me
+// возвращает информацию о пользователе GET /users/me
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
@@ -90,7 +90,7 @@ const updateUser = (req, res, next) => {
       }
     });
 };
-// ручка POST /signin возвращает JWT - работает
+// ручка  POST /signin возвращает JWT - работает
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -106,15 +106,23 @@ const login = (req, res, next) => {
           next(new UnauthorizedError('Неправильные почта или пароль'));
         }
 
+        const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {
+          expiresIn: '7d',
+        });
+
+        // Добавляем куки
+        res.cookie('jwt', token, {
+          httpOnly: true, // Сделать куки недоступным для клиентских JavaScript скриптов
+          secure: true, // Отправлять куки только по HTTPS
+          maxAge: 3600000 * 24 * 7, // Установить время жизни куки в 7 дней
+        });
+
         return res.status(OK).send({
           message: 'Успешно авторизован',
-          token: jwt.sign({ _id: user._id }, 'super-strong-secret', {
-            expiresIn: '7d',
-          }),
+          token,
         });
       });
     })
-    .catch(() => next(new UnauthorizedError('Неизвестная ошибка')))
     .catch(next);
 };
 
@@ -124,5 +132,5 @@ const signOut = (req, res) => {
 };
 
 module.exports = {
-  getUser, updateUser,createUser,login, signOut
+  getUser, updateUser, createUser, login, signOut,
 };
