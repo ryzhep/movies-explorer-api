@@ -9,6 +9,7 @@ const ConflictError = require('../errors/ConflictError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const { CREATED_201 } = require('../utils/constants');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const OK = 200;
