@@ -10,7 +10,7 @@ const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const { CREATED_201 } = require('../utils/constants');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env.NODE_ENV !== 'production'
 
 const OK = 200;
 
