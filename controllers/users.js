@@ -9,6 +9,7 @@ const ConflictError = require('../errors/ConflictError');
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
 const { CREATED_201 } = require('../utils/constants');
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 const OK = 200;
 
@@ -106,9 +107,7 @@ const login = (req, res, next) => {
           next(new UnauthorizedError('Неправильные почта или пароль'));
         }
 
-        const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {
-          expiresIn: '7d',
-        });
+        const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
 
         // Добавляем куки
         res.cookie('jwt', token, {
