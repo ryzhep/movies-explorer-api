@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const cors = require('cors');
 const { errors } = require('celebrate');
 const limiter = require('./middlewares/limiter');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -12,9 +13,10 @@ const appRouter = require('./routes/index');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
-
+app.use(cors());
 app.use(helmet());
 mongoose.connect(DB);
+
 app.use(express.json());
 
 app.use(requestLogger);
