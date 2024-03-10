@@ -3,10 +3,13 @@ require('dotenv').config();
 
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const cors = require('cors');
 const { errors } = require('celebrate');
 const limiter = require('./middlewares/limiter');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { DB, PORT } = require('./utils/config');
+
+
 
 const appRouter = require('./routes/index');
 const errorHandler = require('./middlewares/errorHandler');
@@ -15,6 +18,13 @@ const app = express();
 
 app.use(helmet());
 mongoose.connect(DB);
+app.use(cors({
+  origin: 'https://ryzhep-movies.nomoredomainsmonster.ru', // Разрешаем доступ только с определенного домена
+  methods: ['GET', 'POST','DELETE', 'PATCH' ], // Укажите методы, которые разрешены
+  allowedHeaders: ['Content-Type', 'Authorization'], // Укажите разрешенные заголовки
+  credentials: true, // Разрешение кросс-доменных запросов с передачей авторизационных данных
+}));
+
 app.use(express.json());
 
 app.use(requestLogger);
