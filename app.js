@@ -15,9 +15,9 @@ const appRouter = require('./routes/index');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
-
-app.use(helmet());
 mongoose.connect(DB);
+app.use(helmet());
+
 app.use(cors({
   origin: 'https://ryzhep-movies.nomoredomainsmonster.ru', // Разрешаем доступ только с определенного домена
   methods: ['GET', 'POST','DELETE', 'PATCH' ], // Укажите методы, которые разрешены
